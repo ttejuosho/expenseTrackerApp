@@ -24,7 +24,9 @@ const Header = ({ darkMode, toggleTheme }) => {
           </button>
           <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
             <FiUser className="w-5 h-5" />
-            <span>Login</span>
+            <a href="/login" className="text-primary hover:text-primary-600">
+              Sign in
+            </a>
           </button>
         </div>
       </div>
