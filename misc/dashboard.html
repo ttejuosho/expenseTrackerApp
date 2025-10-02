@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | PennyPincher Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366f1",
+              secondary: "#a5b4fc",
+              dark: "#1e293b",
+              light: "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .sidebar {
+        transition: all 0.3s ease;
+      }
+      .sidebar-collapsed {
+        width: 80px;
+      }
+      .sidebar-expanded {
+        width: 250px;
+      }
+      .main-content {
+        transition: margin-left 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300 flex"
+  >
+    <!-- Sidebar -->
+    <div
+      id="sidebar"
+      class="sidebar sidebar-expanded bg-white dark:bg-gray-800 h-screen fixed shadow-lg flex flex-col"
+    >
+      <div
+        class="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700"
+      >
+        <div class="flex items-center space-x-2">
+          <i data-feather="dollar-sign" class="text-primary w-6 h-6"></i>
+          <span id="logo-text" class="font-bold text-lg">PennyPincher</span>
+        </div>
+        <button
+          id="sidebar-toggle"
+          class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          <i data-feather="chevron-left"></i>
+        </button>
+      </div>
+      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg bg-primary bg-opacity-10 dark:bg-opacity-20 text-primary"
+        >
+          <i data-feather="home" class="w-5 h-5"></i>
+          <span id="menu-item-1" class="font-medium">Dashboard</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i data-feather="dollar-sign" class="w-5 h-5"></i>
+          <span id="menu-item-2" class="font-medium">Transactions</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i data-feather="pie-chart" class="w-5 h-5"></i>
+          <span id="menu-item-3" class="font-medium">Analytics</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i data-feather="credit-card" class="w-5 h-5"></i>
+          <span id="menu-item-4" class="font-medium">Budgets</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i data-feather="file-text" class="w-5 h-5"></i>
+          <span id="menu-item-5" class="font-medium">Reports</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+          <i data-feather="settings" class="w-5 h-5"></i>
+          <span id="menu-item-6" class="font-medium">Settings</span>
+        </a>
+      </nav>
+      <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div
+          class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+        >
+          <div
+            class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white"
+          >
+            <span>JP</span>
+          </div>
+          <div id="user-info">
+            <p class="font-medium text-sm">John Penny</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">View Profile</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content flex-1 ml-[250px] p-8">
+      <header class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold">Dashboard Overview</h1>
+        <div class="flex items-center space-x-4">
+          <button
+            id="theme-toggle"
+            class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+          >
+            <i data-feather="moon" class="dark:hidden"></i>
+            <i data-feather="sun" class="hidden dark:block"></i>
+          </button>
+          <div class="relative">
+            <button
+              class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <i data-feather="bell"></i>
+              <span
+                class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"
+              ></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Total Balance
+              </p>
+              <p class="text-2xl font-bold">$5,245.80</p>
+            </div>
+            <div
+              class="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300"
+            >
+              <i data-feather="trending-up" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-sm text-green-600 dark:text-green-400 mt-2">
+            +12.5% from last month
+          </p>
+        </div>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Monthly Income
+              </p>
+              <p class="text-2xl font-bold">$3,500.00</p>
+            </div>
+            <div
+              class="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+            >
+              <i data-feather="dollar-sign" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-sm text-blue-600 dark:text-blue-400 mt-2">
+            +$500 from last month
+          </p>
+        </div>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Monthly Expenses
+              </p>
+              <p class="text-2xl font-bold">$1,875.30</p>
+            </div>
+            <div
+              class="p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300"
+            >
+              <i data-feather="shopping-bag" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-sm text-red-600 dark:text-red-400 mt-2">
+            +8.2% from last month
+          </p>
+        </div>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Savings Rate
+              </p>
+              <p class="text-2xl font-bold">46.4%</p>
+            </div>
+            <div
+              class="p-3 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300"
+            >
+              <i data-feather="percent" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <p class="text-sm text-purple-600 dark:text-purple-400 mt-2">
+            +5.3% from last month
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div
+          class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold">Spending Trends</h2>
+            <select
+              class="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option>Last 7 Days</option>
+              <option>Last 30 Days</option>
+              <option selected>Last 6 Months</option>
+              <option>Last Year</option>
+            </select>
+          </div>
+          <div className="relative w-full h-64">
+            <canvas id="trendChart" height="250"></canvas>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+        >
+          <h2 class="text-xl font-semibold mb-6">Budget Progress</h2>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Food & Dining</span>
+                <span>$450/$600</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-green-500 h-2 rounded-full"
+                  style="width: 75%"
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Transportation</span>
+                <span>$120/$200</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-blue-500 h-2 rounded-full"
+                  style="width: 60%"
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Entertainment</span>
+                <span>$90/$150</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-yellow-500 h-2 rounded-full"
+                  style="width: 60%"
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Shopping</span>
+                <span>$240/$300</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-purple-500 h-2 rounded-full"
+                  style="width: 80%"
+                ></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span>Utilities</span>
+                <span>$180/$250</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  class="bg-red-500 h-2 rounded-full"
+                  style="width: 72%"
+                ></div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="w-full mt-6 bg-primary hover:bg-primary-600 text-white py-2 rounded-lg"
+          >
+            View All Budgets
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+      >
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold">Recent Transactions</h2>
+          <button
+            class="text-primary hover:text-primary-600 text-sm font-medium"
+          >
+            View All
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr
+                class="text-left border-b border-gray-200 dark:border-gray-700"
+              >
+                <th class="pb-3">Date</th>
+                <th class="pb-3">Description</th>
+                <th class="pb-3">Category</th>
+                <th class="pb-3 text-right">Amount</th>
+                <th class="pb-3"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr>
+                <td class="py-3 text-sm">Mar 20</td>
+                <td class="py-3 font-medium">Grocery Store</td>
+                <td class="py-3">
+                  <span
+                    class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs"
+                    >Food</span
+                  >
+                </td>
+                <td class="py-3 text-right font-medium">-$85.60</td>
+                <td class="py-3 text-right">
+                  <button
+                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <i data-feather="more-vertical" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 text-sm">Mar 19</td>
+                <td class="py-3 font-medium">Gas Station</td>
+                <td class="py-3">
+                  <span
+                    class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs"
+                    >Transport</span
+                  >
+                </td>
+                <td class="py-3 text-right font-medium">-$45.20</td>
+                <td class="py-3 text-right">
+                  <button
+                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <i data-feather="more-vertical" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 text-sm">Mar 18</td>
+                <td class="py-3 font-medium">Monthly Salary</td>
+                <td class="py-3">
+                  <span
+                    class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-xs"
+                    >Income</span
+                  >
+                </td>
+                <td
+                  class="py-3 text-right font-medium text-green-600 dark:text-green-400"
+                >
+                  +$3,500.00
+                </td>
+                <td class="py-3 text-right">
+                  <button
+                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <i data-feather="more-vertical" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 text-sm">Mar 17</td>
+                <td class="py-3 font-medium">Restaurant</td>
+                <td class="py-3">
+                  <span
+                    class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs"
+                    >Food</span
+                  >
+                </td>
+                <td class="py-3 text-right font-medium">-$62.40</td>
+                <td class="py-3 text-right">
+                  <button
+                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <i data-feather="more-vertical" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="py-3 text-sm">Mar 16</td>
+                <td class="py-3 font-medium">Electric Bill</td>
+                <td class="py-3">
+                  <span
+                    class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs"
+                    >Utilities</span
+                  >
+                </td>
+                <td class="py-3 text-right font-medium">-$120.50</td>
+                <td class="py-3 text-right">
+                  <button
+                    class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <i data-feather="more-vertical" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Sidebar toggle
+      const sidebar = document.getElementById("sidebar");
+      const sidebarToggle = document.getElementById("sidebar-toggle");
+      const mainContent = document.getElementById("main-content");
+      const menuItems = document.querySelectorAll('[id^="menu-item-"]');
+      const logoText = document.getElementById("logo-text");
+      const userInfo = document.getElementById("user-info");
+
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("sidebar-collapsed");
+        sidebar.classList.toggle("sidebar-expanded");
+        mainContent.classList.toggle("ml-[80px]");
+        mainContent.classList.toggle("ml-[250px]");
+
+        menuItems.forEach((item) => {
+          item.classList.toggle("hidden");
+        });
+
+        logoText.classList.toggle("hidden");
+        userInfo.classList.toggle("hidden");
+
+        const isCollapsed = sidebar.classList.contains("sidebar-collapsed");
+        sidebarToggle.innerHTML = isCollapsed
+          ? '<i data-feather="chevron-right"></i>'
+          : '<i data-feather="chevron-left"></i>';
+        feather.replace();
+      });
+
+      // Theme toggle
+      const themeToggle = document.getElementById("theme-toggle");
+      const html = document.documentElement;
+
+      themeToggle.addEventListener("click", () => {
+        html.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          html.classList.contains("dark") ? "dark" : "light"
+        );
+        feather.replace();
+      });
+
+      // Check for saved theme preference
+      if (
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        html.classList.add("dark");
+      } else {
+        html.classList.remove("dark");
+      }
+
+      // Initialize charts
+      document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+
+        // Trend Chart
+        const trendCtx = document.getElementById("trendChart").getContext("2d");
+        const trendChart = new Chart(trendCtx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+              {
+                label: "Income",
+                data: [3200, 3000, 3500, 3400, 3600, 3800],
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+              },
+              {
+                label: "Expenses",
+                data: [1800, 2000, 1875, 2100, 1950, 2200],
+                borderColor: "#ef4444",
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  drawBorder: false,
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

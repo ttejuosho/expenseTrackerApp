@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PennyPincher Pro | Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#6366f1",
+              secondary: "#a5b4fc",
+              dark: "#1e293b",
+              light: "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .vanta-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.3;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .progress-bar {
+        transition: width 1s ease-in-out;
+      }
+      .theme-toggle {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300"
+  >
+    <div id="vanta-bg" class="vanta-bg"></div>
+
+    <header class="container mx-auto px-4 py-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <i data-feather="dollar-sign" class="text-primary w-8 h-8"></i>
+          <h1
+            class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          >
+            PennyPincher Pro
+          </h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button
+            id="theme-toggle"
+            class="theme-toggle p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+          >
+            <i data-feather="moon" class="dark:hidden"></i>
+            <i data-feather="sun" class="hidden dark:block"></i>
+          </button>
+          <button
+            class="bg-primary hover:bg-primary-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+          >
+            <i data-feather="user"></i>
+            <span>Login</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Summary Card -->
+        <div class="lg:col-span-1 space-y-6">
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+          >
+            <h2 class="text-xl font-semibold mb-4">Monthly Summary</h2>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-sm font-medium">Budget Used</span>
+                  <span class="text-sm font-medium">75%</span>
+                </div>
+                <div
+                  class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5"
+                >
+                  <div
+                    class="bg-primary h-2.5 rounded-full progress-bar"
+                    style="width: 75%"
+                  ></div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Budget</p>
+                  <p class="text-2xl font-bold">$2,500</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Spent</p>
+                  <p class="text-2xl font-bold">$1,875</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Remaining
+                  </p>
+                  <p class="text-2xl font-bold">$625</p>
+                </div>
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Daily Avg.
+                  </p>
+                  <p class="text-2xl font-bold">$62.5</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Add Expense -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+          >
+            <h2 class="text-xl font-semibold mb-4">Quick Add Expense</h2>
+            <form class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Amount</label>
+                <div class="relative">
+                  <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
+                    >$</span
+                  >
+                  <input
+                    type="number"
+                    class="w-full pl-8 pr-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Category</label>
+                <select
+                  class="w-full py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option>Food</option>
+                  <option>Transportation</option>
+                  <option>Entertainment</option>
+                  <option>Utilities</option>
+                  <option>Shopping</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  class="w-full py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Notes</label>
+                <textarea
+                  rows="2"
+                  class="w-full py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Optional"
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-primary hover:bg-primary-600 text-white py-2 rounded-lg flex items-center justify-center space-x-2"
+              >
+                <i data-feather="plus"></i>
+                <span>Add Expense</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Recent Transactions -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold">Recent Transactions</h2>
+              <div class="flex space-x-2">
+                <button
+                  class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-lg"
+                >
+                  <i data-feather="filter"></i>
+                </button>
+                <button
+                  class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 p-2 rounded-lg"
+                >
+                  <i data-feather="calendar"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr
+                    class="text-left border-b border-gray-200 dark:border-gray-700"
+                  >
+                    <th class="pb-2">Date</th>
+                    <th class="pb-2">Category</th>
+                    <th class="pb-2">Description</th>
+                    <th class="pb-2 text-right">Amount</th>
+                    <th class="pb-2"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tr>
+                    <td class="py-3">Today</td>
+                    <td class="py-3">
+                      <span
+                        class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs"
+                        >Food</span
+                      >
+                    </td>
+                    <td class="py-3">Lunch with friends</td>
+                    <td class="py-3 text-right">-$24.50</td>
+                    <td class="py-3 text-right">
+                      <button
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        <i data-feather="more-vertical" class="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3">Yesterday</td>
+                    <td class="py-3">
+                      <span
+                        class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs"
+                        >Transport</span
+                      >
+                    </td>
+                    <td class="py-3">Uber ride</td>
+                    <td class="py-3 text-right">-$12.75</td>
+                    <td class="py-3 text-right">
+                      <button
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        <i data-feather="more-vertical" class="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3">Mar 15</td>
+                    <td class="py-3">
+                      <span
+                        class="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-xs"
+                        >Shopping</span
+                      >
+                    </td>
+                    <td class="py-3">New shoes</td>
+                    <td class="py-3 text-right">-$89.99</td>
+                    <td class="py-3 text-right">
+                      <button
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        <i data-feather="more-vertical" class="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3">Mar 14</td>
+                    <td class="py-3">
+                      <span
+                        class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-xs"
+                        >Entertainment</span
+                      >
+                    </td>
+                    <td class="py-3">Movie tickets</td>
+                    <td class="py-3 text-right">-$34.00</td>
+                    <td class="py-3 text-right">
+                      <button
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        <i data-feather="more-vertical" class="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="py-3">Mar 12</td>
+                    <td class="py-3">
+                      <span
+                        class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs"
+                        >Utilities</span
+                      >
+                    </td>
+                    <td class="py-3">Electric bill</td>
+                    <td class="py-3 text-right">-$120.50</td>
+                    <td class="py-3 text-right">
+                      <button
+                        class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      >
+                        <i data-feather="more-vertical" class="w-4 h-4"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Analytics -->
+          <div
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 card-hover transition-all duration-300"
+          >
+            <h2 class="text-xl font-semibold mb-6">Spending Analytics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <canvas id="categoryChart" height="250"></canvas>
+              </div>
+              <div>
+                <canvas id="monthlyTrendChart" height="250"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      class="container mx-auto px-4 py-8 text-center text-gray-500 dark:text-gray-400"
+    >
+      <p>© 2023 PennyPincher Pro. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <script>
+      // Vanta.js background
+      VANTA.GLOBE({
+        el: "#vanta-bg",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.0,
+        minWidth: 200.0,
+        scale: 1.0,
+        scaleMobile: 1.0,
+        color: 0x6366f1,
+        backgroundColor: 0x0,
+      });
+
+      // Theme toggle
+      const themeToggle = document.getElementById("theme-toggle");
+      const html = document.documentElement;
+
+      themeToggle.addEventListener("click", () => {
+        html.classList.toggle("dark");
+        localStorage.setItem(
+          "theme",
+          html.classList.contains("dark") ? "dark" : "light"
+        );
+        feather.replace();
+      });
+
+      // Check for saved theme preference
+      if (
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        html.classList.add("dark");
+      } else {
+        html.classList.remove("dark");
+      }
+
+      // Initialize charts
+      document.addEventListener("DOMContentLoaded", function () {
+        feather.replace();
+
+        // Category Chart
+        const categoryCtx = document
+          .getElementById("categoryChart")
+          .getContext("2d");
+        const categoryChart = new Chart(categoryCtx, {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Food",
+              "Transport",
+              "Shopping",
+              "Entertainment",
+              "Utilities",
+              "Other",
+            ],
+            datasets: [
+              {
+                data: [300, 120, 240, 150, 180, 90],
+                backgroundColor: [
+                  "#10b981",
+                  "#3b82f6",
+                  "#8b5cf6",
+                  "#f59e0b",
+                  "#ef4444",
+                  "#64748b",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "right",
+                labels: {
+                  boxWidth: 12,
+                  padding: 20,
+                  usePointStyle: true,
+                  pointStyle: "circle",
+                },
+              },
+            },
+          },
+        });
+
+        // Monthly Trend Chart
+        const trendCtx = document
+          .getElementById("monthlyTrendChart")
+          .getContext("2d");
+        const trendChart = new Chart(trendCtx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+              {
+                label: "Monthly Spending",
+                data: [1200, 1900, 1500, 2100, 1800, 1700],
+                backgroundColor: "rgba(99, 102, 241, 0.1)",
+                borderColor: "#6366f1",
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: "#6366f1",
+                pointRadius: 4,
+                pointHoverRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  drawBorder: false,
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
