@@ -9,7 +9,12 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your frontend origin
+    credentials: true, // if you need cookies
+  })
+);
 app.use(express.json());
 
 // Routes

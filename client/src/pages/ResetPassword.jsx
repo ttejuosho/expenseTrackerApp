@@ -1,11 +1,24 @@
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useParams, useNavigate } from "react-router-dom";
 import feather from "feather-icons";
+import toast from "react-hot-toast";
+import authService from "../services/authService.js";
 
 const ResetPassword = () => {
+  const { token } = useParams(); // <-- get token from the path
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm();
+
   useEffect(() => {
     feather.replace();
 
-    // Theme detection
     if (
       localStorage.getItem("theme") === "dark" ||
       (!localStorage.getItem("theme") &&
@@ -14,6 +27,26 @@ const ResetPassword = () => {
       document.documentElement.classList.add("dark");
     }
   }, []);
+
+  const onSubmit = async (data) => {
+    if (!token) {
+      toast.error("Invalid reset token.");
+      return;
+    }
+
+    if (data.password !== data.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    try {
+      await authService.resetPassword(token, data.password);
+      toast.success("Password reset successful!");
+      navigate("/login");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to reset password.");
+    }
+  };
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
@@ -37,7 +70,7 @@ const ResetPassword = () => {
             Reset your password
           </h2>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label className="block text-sm font-medium mb-1">
                 New password
@@ -45,9 +78,17 @@ const ResetPassword = () => {
               <input
                 type="password"
                 placeholder="••••••••"
-                required
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 8, message: "At least 8 characters" },
+                })}
                 className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -57,16 +98,26 @@ const ResetPassword = () => {
               <input
                 type="password"
                 placeholder="••••••••"
-                required
+                {...register("confirmPassword", {
+                  required: "Please confirm your password",
+                  validate: (value) =>
+                    value === watch("password") || "Passwords do not match",
+                })}
                 className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-primary-600 text-white py-2 rounded-lg"
+              disabled={isSubmitting}
+              className="w-full bg-primary hover:bg-primary-600 text-white py-2 rounded-lg disabled:opacity-50"
             >
-              Reset password
+              {isSubmitting ? "Resetting..." : "Reset password"}
             </button>
           </form>
 

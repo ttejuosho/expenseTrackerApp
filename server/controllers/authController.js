@@ -76,8 +76,10 @@ export const logout = async (req, res) => {
 // --- Forgot Password ---
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log("Forgot password request for:", email.email);
   try {
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email: email.email } });
+    console.log("User found:", user.dataValues);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
