@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
+import React, { useEffect } from "react";
+import { useOutletContext } from "react-router-dom";
 import MonthlySummary from "../components/MonthlySummary";
 import QuickAddExpense from "../components/QuickAddExpense";
 import RecentTransactions from "../components/RecentTransactions";
 import SpendingAnalytics from "../components/SpendingAnalytics";
-import Footer from "../components/Footer";
-//import { VantaGlobe } from "../utils/vanta";
+// Vanta.js import commented
+// import { VantaGlobe } from "../utils/vanta";
 
 function Home() {
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode } = useOutletContext(); // Get theme from MainLayout
 
   useEffect(() => {
-    // Initialize Vanta.js
+    // Initialize Vanta.js if needed
     // const vantaEffect = VantaGlobe({
     //   el: "#vanta-bg",
     //   color: 0x6366f1,
@@ -20,12 +20,6 @@ function Home() {
     //   if (vantaEffect) vantaEffect.destroy();
     // };
   }, []);
-
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-    localStorage.setItem("theme", darkMode ? "light" : "dark");
-  };
 
   const recentTransactionsData = [
     {
@@ -82,7 +76,6 @@ function Home() {
       ></div>
 
       <div className="relative z-10">
-        <Header darkMode={darkMode} toggleTheme={toggleTheme} />
         <main className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
@@ -95,7 +88,6 @@ function Home() {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     </div>
   );

@@ -1,24 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
 import SummaryCard from "../components/SummaryCard";
 import SpendingTrends from "../components/SpendingTrends";
 import BudgetProgressCard from "../components/BudgetProgressCard";
 import RecentTransactions from "../components/RecentTransactions";
 
 function Dashboard() {
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode, user } = useOutletContext();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
-    localStorage.setItem("theme", darkMode ? "light" : "dark");
-  };
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
 
   const summaryData = [
     {
@@ -135,14 +127,11 @@ function Dashboard() {
       } flex`}
     >
       <Sidebar collapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-
       <div
         className={`flex-1 transition-all duration-300 ${
           sidebarCollapsed ? "ml-20" : "ml-64"
         } p-8`}
       >
-        <Header darkMode={darkMode} toggleTheme={toggleTheme} />
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {summaryData.map((item, index) => (
             <SummaryCard

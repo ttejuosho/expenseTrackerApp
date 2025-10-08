@@ -31,16 +31,17 @@ export const register = async (req, res) => {
 
     // Generate JWT
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email },
+      { userId: newUser.userId, email: newUser.email },
       process.env.JWT_SECRET,
       {
         expiresIn: "1d",
       }
     );
 
-    res
-      .status(201)
-      .json({ user: { id: newUser.id, firstName, lastName, email }, token });
+    res.status(201).json({
+      user: { userId: newUser.userId, firstName, lastName, email },
+      token,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to register user" });
@@ -61,7 +62,7 @@ export const login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.json({ token, user: { id: user.id, email: user.email } });
+    res.json({ token, user: { userId: user.userId, email: user.email } });
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
   }
@@ -82,7 +83,7 @@ export const forgotPassword = async (req, res) => {
     console.log("User found:", user.dataValues);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -127,5 +128,40 @@ export const resetPassword = async (req, res) => {
     res.json({ message: "Password has been reset" });
   } catch (err) {
     res.status(500).json({ error: "Failed to reset password" });
+  }
+};
+
+// --- Get Current User ---
+export const getCurrentUser0 = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.userId, {
+      attributes: ["userId", "firstName", "lastName", "email"],
+    });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // Assuming you store the userId in req.user from your auth middleware
+    const user = req.user;
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+
+    // Optionally, fetch full user details from DB
+    // const userData = await User.findByPk(user.id, { attributes: ["id", "firstName", "lastName", "email"] });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get current user" });
   }
 };

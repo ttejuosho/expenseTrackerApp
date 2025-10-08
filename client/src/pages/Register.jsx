@@ -50,12 +50,6 @@ const Register = () => {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2">
-            <i data-feather="dollar-sign" className="text-primary w-8 h-8"></i>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              PennyPincher Pro
-            </h1>
-          </div>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
             Track your expenses, save more money
           </p>
@@ -103,7 +97,7 @@ const Register = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1">
-                Email address
+                Email Address
               </label>
               <input
                 type="email"

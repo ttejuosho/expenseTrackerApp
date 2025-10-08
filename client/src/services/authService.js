@@ -1,4 +1,3 @@
-// src/services/authService.js
 import api from "../api/axios";
 
 const authService = {
@@ -7,8 +6,8 @@ const authService = {
     return response.data;
   },
 
-  login: async (credentials) => {
-    const response = await api.post("/auth/login", credentials);
+  login: async (email, password) => {
+    const response = await api.post("/auth/login", { email, password });
     return response.data;
   },
 

@@ -1,5 +1,6 @@
 // src/api/axios.js
 import axios from "axios";
+import authService from "../services/authService";
 
 // Create Axios instance
 const api = axios.create({
@@ -22,11 +23,22 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Centralized error handling (e.g., redirect to login on 401)
+  async (error) => {
     if (error.response?.status === 401) {
-      console.warn("Unauthorized - redirecting to login...");
-      // Optionally trigger logout here
+      const currentPath = window.location.pathname;
+      const isAuthPage =
+        currentPath === "/login" || currentPath === "/register";
+
+      // Avoid redirect loop
+      if (!isAuthPage) {
+        console.warn("Unauthorized - logging out...");
+        try {
+          await authService.logout();
+        } catch (e) {
+          console.error("Logout failed:", e);
+        }
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
