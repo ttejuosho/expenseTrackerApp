@@ -1,9 +1,10 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
+import { Expense } from "../models/index.js";
 
-export const User = sequelize.define("User", {
-  id: {
+const User = sequelize.define("User", {
+  userId: {
     type: DataTypes.UUID,
     defaultValue: () => uuidv4(),
     primaryKey: true,
@@ -34,3 +35,5 @@ export const User = sequelize.define("User", {
     allowNull: true,
   },
 });
+
+export default User;

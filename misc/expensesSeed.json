@@ -1,0 +1,20 @@
+[
+  {
+    "amount": 29.99,
+    "categoryId": "bbd3af98-915a-485e-b840-d90d2e499c78",
+    "date": "10/08/2025",
+    "notes": "Shopping at O2"
+  },
+  {
+    "amount": 1523.13,
+    "categoryId": "bfdecdd8-ff3d-40bd-9874-1f98b52746d7",
+    "date": "09/08/2025",
+    "notes": "FLight to Dallas"
+  },
+  {
+    "amount": 45.5,
+    "categoryId": "341c1f7c-ff7b-4725-bd2c-e3a893428091",
+    "date": "10/18/2025",
+    "notes": "Gas Bill October"
+  }
+]

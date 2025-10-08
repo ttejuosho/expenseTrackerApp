@@ -1,6 +1,6 @@
 // controllers/categoryController.js
 import { v4 as uuidv4 } from "uuid";
-import Category from "../models/Category.js";
+import { Category } from "../models/index.js";
 
 // Get all categories
 export const getAllCategories = async (req, res) => {

@@ -29,7 +29,7 @@ sequelize
   .sync({ alter: true }) // { force: true } if you want to reset DB
   .then(() => {
     console.log("Database synced");
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => console.error("DB connection error:", err));

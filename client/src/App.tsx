@@ -17,7 +17,9 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route
+          <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* <Route
             path="/"
             element={
               <ProtectedRoute>
@@ -32,7 +34,7 @@ const App = () => {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          /> */}
         </Routes>
       </Router>
     </AuthProvider>

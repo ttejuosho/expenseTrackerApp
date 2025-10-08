@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api",
   withCredentials: true, // needed for HttpOnly cookie auth
   headers: {
     "Content-Type": "application/json",
