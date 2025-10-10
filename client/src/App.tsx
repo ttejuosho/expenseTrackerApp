@@ -19,17 +19,6 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/h" element={<Home />} />
-            {/* <Route path="/" element={<Home />} /> */}
-            <Route path="/hh" element={<Dashboard />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/home"
               element={

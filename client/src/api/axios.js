@@ -1,9 +1,8 @@
-// src/api/axios.js
 import axios from "axios";
 import authService from "../services/authService";
 
 // Create Axios instance
-const api = axios.create({
+const API = axios.create({
   baseURL: import.meta.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api",
   withCredentials: true, // needed for HttpOnly cookie auth
   headers: {
@@ -12,7 +11,7 @@ const api = axios.create({
 });
 
 // Request interceptor
-api.interceptors.request.use(
+API.interceptors.request.use(
   (config) => {
     // You could add extra headers here (e.g., authorization if using token in header)
     return config;
@@ -21,27 +20,30 @@ api.interceptors.request.use(
 );
 
 // Response interceptor
-api.interceptors.response.use(
+API.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
-      const isAuthPage =
-        currentPath === "/login" || currentPath === "/register";
-
+      const publicPaths = [
+        "/login",
+        "/register",
+        "/forgot-password",
+        "/reset-password",
+      ];
       // Avoid redirect loop
-      if (!isAuthPage) {
+      if (!publicPaths.includes(currentPath)) {
         console.warn("Unauthorized - logging out...");
         try {
           await authService.logout();
         } catch (e) {
           console.error("Logout failed:", e);
         }
-        window.location.href = "/login";
+        await authService.logout(); // Clear any client-side auth state
       }
     }
     return Promise.reject(error);
   }
 );
 
-export default api;
+export default API;

@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // use your AuthContext
 import Sidebar from "../components/Sidebar";
 import SummaryCard from "../components/SummaryCard";
 import SpendingTrends from "../components/SpendingTrends";
@@ -7,10 +8,29 @@ import BudgetProgressCard from "../components/BudgetProgressCard";
 import RecentTransactions from "../components/RecentTransactions";
 
 function Dashboard() {
-  const { darkMode, toggleDarkMode, user } = useOutletContext();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
 
   const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
+  const toggleDarkMode = () => setDarkMode(!darkMode);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading your dashboard...</p>
+      </div>
+    );
+  }
+
+  if (!user) return null; // Prevent render flash
 
   const summaryData = [
     {
@@ -101,22 +121,6 @@ function Dashboard() {
       categoryColor:
         "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200",
       amount: "+$3,500.00",
-    },
-    {
-      date: "Mar 17",
-      description: "Restaurant",
-      category: "Food",
-      categoryColor:
-        "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
-      amount: "-$62.40",
-    },
-    {
-      date: "Mar 16",
-      description: "Electric Bill",
-      category: "Utilities",
-      categoryColor:
-        "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200",
-      amount: "-$120.50",
     },
   ];
 

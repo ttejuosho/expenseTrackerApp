@@ -1,21 +1,21 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import authService from "../services/authService";
 
 const Login = () => {
+  const { setUser } = useAuth();
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (e) => {
+    e.preventDefault();
     try {
-      await authService.login(data.email, data.password);
+      const res = await authService.login(formData.email, formData.password);
+      setUser(res.user); // Update context with logged-in user
       toast.success("Login successful!");
-      navigate("/home");
+      navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed.");
     }
@@ -32,7 +32,7 @@ const Login = () => {
                   Welcome back
                 </h2>
 
-                <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                <form className="space-y-4" onSubmit={onSubmit}>
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Email Address
@@ -40,16 +40,13 @@ const Login = () => {
                     <input
                       type="email"
                       placeholder="your@email.com"
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
+                      name="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.email.message}
-                      </p>
-                    )}
                   </div>
 
                   <div>
@@ -58,17 +55,14 @@ const Login = () => {
                     </label>
                     <input
                       type="password"
-                      placeholder="••••••••"
-                      {...register("password", {
-                        required: "Password is required",
-                      })}
+                      placeholder=""
+                      name="password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
                       className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    {errors.password && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.password.message}
-                      </p>
-                    )}
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -89,13 +83,11 @@ const Login = () => {
                       Forgot password?
                     </a>
                   </div>
-
                   <button
                     type="submit"
-                    disabled={isSubmitting}
                     className="w-full bg-primary hover:bg-primary-600 text-white py-2 rounded-lg disabled:opacity-50"
                   >
-                    {isSubmitting ? "Signing in..." : "Sign in"}
+                    Sign In
                   </button>
                 </form>
 

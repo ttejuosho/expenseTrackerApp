@@ -58,11 +58,26 @@ export const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
 
-    res.json({ token, user: { userId: user.userId, email: user.email } });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      token,
+      user: {
+        userId: user.userId,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
   }
@@ -146,8 +161,9 @@ export const getCurrentUser0 = async (req, res) => {
     });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json(user);
+    res.status(200).json(user);
   } catch (err) {
+    console.error("Error fetching current user:", error);
     res.status(401).json({ error: "Invalid token" });
   }
 };
@@ -159,7 +175,7 @@ export const getCurrentUser = async (req, res) => {
     if (!user) return res.status(401).json({ error: "Unauthorized" });
 
     // Optionally, fetch full user details from DB
-    // const userData = await User.findByPk(user.id, { attributes: ["id", "firstName", "lastName", "email"] });
+    // const userData = await User.findByPk(user.userId, { attributes: ["userId", "firstName", "lastName", "email"] });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: "Failed to get current user" });

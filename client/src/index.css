@@ -62,7 +62,8 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  color: white;
+  background-color: oklch(0.61 0.21 278.58);
   cursor: pointer;
   transition: border-color 0.25s;
 }
