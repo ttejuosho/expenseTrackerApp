@@ -1,7 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
-import { Expense } from "../models/index.js";
 
 const User = sequelize.define("User", {
   userId: {

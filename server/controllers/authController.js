@@ -51,9 +51,10 @@ export const register = async (req, res) => {
 // --- Login ---
 export const login = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user) return res.status(401).json({ error: "User email not found" });
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: "Invalid credentials" });
@@ -70,7 +71,6 @@ export const login = async (req, res) => {
     });
 
     res.json({
-      token,
       user: {
         userId: user.userId,
         email: user.email,
@@ -85,17 +85,27 @@ export const login = async (req, res) => {
 
 // --- Logout ---
 export const logout = async (req, res) => {
-  // Client just deletes token
-  res.json({ message: "Logged out" });
+  try {
+    // Clear the cookie by setting it to empty and expiring it immediately
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      expires: new Date(0), // immediately expired
+    });
+
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Logout failed:", err);
+    res.status(500).json({ error: "Logout failed" });
+  }
 };
 
 // --- Forgot Password ---
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  console.log("Forgot password request for:", email.email);
   try {
     const user = await User.findOne({ where: { email: email.email } });
-    console.log("User found:", user.dataValues);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {
@@ -126,7 +136,7 @@ export const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findByPk(decoded.id);
+    const user = await User.findByPk(decoded.userId);
 
     if (
       !user ||

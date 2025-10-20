@@ -5,6 +5,8 @@ import sequelize from "./config/db.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import budgetRoutes from "./routes/budgetRoutes.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
@@ -15,12 +17,14 @@ app.use(
     credentials: true, // if you need cookies
   })
 );
+app.use(cookieParser());
 app.use(express.json());
 
 // Routes
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/budgets", budgetRoutes);
 
 app.get("/", (req, res) => res.send("Expense Tracker API is running 🚀"));
 

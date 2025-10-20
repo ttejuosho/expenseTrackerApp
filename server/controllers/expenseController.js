@@ -1,25 +1,30 @@
-import { Expense, Category } from "../models/index.js";
+import { Budget, Expense, Category } from "../models/index.js";
+import { Op } from "sequelize";
 
 const flattenExpense = (expense) => {
-  const { Category: categoryData, ...expenseData } = expense.toJSON();
+  const { category: category, ...expenseData } = expense.toJSON();
   return {
     ...expenseData,
-    categoryId: categoryData.categoryId,
-    categoryName: categoryData.name,
-    categoryColor: categoryData.color,
+    categoryId: category.categoryId,
+    categoryName: category.name,
+    categoryColor: category.color,
   };
 };
 
 // Get a single expense by ID
 export const getExpenseById = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const expense = await Expense.findOne({
       where: { expenseId: req.params.expenseId, userId },
       include: [
-        { model: Category, attributes: ["categoryId", "name", "color"] },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["categoryId", "name", "color"],
+        },
       ],
     });
 
@@ -32,22 +37,21 @@ export const getExpenseById = async (req, res) => {
   }
 };
 
-// GET all expenses
+// GET all expenses No Auth
 export const getAllExpenses = async (req, res) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-
     const expenses = await Expense.findAll({
-      where: { userId },
       include: [
-        { model: Category, attributes: ["categoryId", "name", "color"] },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["categoryId", "name", "color"],
+        },
       ],
       order: [["date", "DESC"]],
     });
 
     const flattened = expenses.map(flattenExpense);
-
     res.json(flattened);
   } catch (err) {
     console.error(err);
@@ -57,7 +61,7 @@ export const getAllExpenses = async (req, res) => {
 
 export const getExpenses = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { categoryId, startDate, endDate } = req.query;
@@ -78,7 +82,11 @@ export const getExpenses = async (req, res) => {
     const expenses = await Expense.findAll({
       where,
       include: [
-        { model: Category, attributes: ["categoryId", "name", "color"] },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["categoryId", "name", "color"],
+        },
       ],
       order: [["date", "DESC"]],
     });
@@ -94,7 +102,7 @@ export const getExpenses = async (req, res) => {
 export const addExpense = async (req, res) => {
   try {
     const { amount, categoryId, date, notes } = req.body;
-    const userId = req.user?.id; // consistent with other controllers
+    const userId = req.user?.userId; // consistent with other controllers
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     if (!amount || !date || !categoryId)
@@ -116,7 +124,11 @@ export const addExpense = async (req, res) => {
     // Refetch to include category data
     const fullExpense = await Expense.findByPk(expense.expenseId, {
       include: [
-        { model: Category, attributes: ["categoryId", "name", "color"] },
+        {
+          model: Category,
+          as: "category",
+          attributes: ["categoryId", "name", "color"],
+        },
       ],
     });
 
@@ -129,7 +141,7 @@ export const addExpense = async (req, res) => {
 
 export const deleteExpense = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const { expenseId } = req.params;
@@ -145,5 +157,116 @@ export const deleteExpense = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete expense" });
+  }
+};
+
+export const getMonthlySummary = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const now = new Date();
+    const month = parseInt(req.query.month) || now.getMonth() + 1; // 1-12
+    const year = parseInt(req.query.year) || now.getFullYear();
+
+    // 1. Get budget for the month
+    const budget = await Budget.findOne({
+      where: { userId: userId, month: month, year: year },
+    });
+
+    if (!budget) {
+      return res.status(404).json({ error: "Budget not found for this month" });
+    }
+
+    // 2. Get all expenses for the month
+    // Fetch expenses for this user/month/year
+    const expenses = await Expense.findAll({
+      where: {
+        userId: userId,
+        date: {
+          [Op.gte]: new Date(year, month - 1, 1),
+          [Op.lt]: new Date(year, month, 1),
+        },
+      },
+    });
+
+    const totalSpent = expenses.reduce(
+      (sum, exp) => sum + parseFloat(exp.amount),
+      0
+    );
+
+    const remaining = parseFloat(budget.amount) - totalSpent;
+    const today = new Date();
+
+    // Calculate daily average spent so far
+    const daysPassed =
+      month === today.getMonth() + 1 && year === today.getFullYear()
+        ? today.getDate()
+        : new Date(year, month, 0).getDate(); // for past months, use total days in month
+
+    const dailyAverage = totalSpent / daysPassed;
+
+    res.json({
+      budgetId: budget.budgetId,
+      month,
+      year,
+      amount: parseFloat(budget.amount),
+      totalSpent,
+      remaining,
+      dailyAverage: parseFloat(dailyAverage.toFixed(2)),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch monthly summary" });
+  }
+};
+
+export const getSummaryByCategory = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // Accept optional month and year query params
+    const now = new Date();
+    const month = parseInt(req.query.month) || now.getMonth() + 1; // 1-12
+    const year = parseInt(req.query.year) || now.getFullYear();
+
+    // Compute start and end dates for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999); // last day of month
+
+    // Fetch expenses for the month, grouped by category
+    const expenses = await Expense.findAll({
+      where: {
+        userId: userId,
+        date: { [Op.between]: [startDate, endDate] },
+      },
+      include: [
+        { model: Category, as: "category", attributes: ["name", "color"] },
+      ],
+    });
+
+    // Aggregate total per category
+    const summary = {};
+    expenses.forEach((exp) => {
+      const categoryName = exp.category?.name || "Uncategorized";
+      if (!summary[categoryName]) {
+        summary[categoryName] = {
+          categoryName: categoryName,
+          categoryColor:
+            exp.category?.color ||
+            "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200",
+          totalSpent: 0,
+        };
+      }
+      summary[categoryName].totalSpent += parseFloat(exp.amount);
+    });
+
+    res.json(Object.values(summary));
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch monthly summary by category" });
   }
 };

@@ -8,6 +8,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import MainLayout from "./layouts/MainLayout";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
             />
           </Route>
         </Routes>
+        <Toaster position="top-right" reverseOrder={false} />
       </Router>
     </AuthProvider>
   );

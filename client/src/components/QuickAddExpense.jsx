@@ -1,26 +1,42 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiPlus } from "react-icons/fi";
+import API from "../api/axios";
+import toast from "react-hot-toast";
 
 const QuickAddExpense = () => {
   const [expense, setExpense] = useState({
     amount: "",
-    category: "Food",
+    categoryId: "",
     date: "",
     notes: "",
   });
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await API.get("/categories");
+        setCategories(res.data); // assuming API returns an array of categories
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setExpense((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Expense added:", expense);
+    await API.post("/expenses", expense);
+    toast.success("Expense added successfully!");
     setExpense({
       amount: "",
-      category: "Food",
+      categoryId: "",
       date: "",
       notes: "",
     });
@@ -47,22 +63,25 @@ const QuickAddExpense = () => {
             />
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Category</label>
           <select
-            name="category"
+            name="categoryId"
             value={expense.category}
             onChange={handleChange}
             className="w-full py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
           >
-            <option>Food</option>
-            <option>Transportation</option>
-            <option>Entertainment</option>
-            <option>Utilities</option>
-            <option>Shopping</option>
-            <option>Other</option>
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.categoryId} value={cat.categoryId}>
+                {cat.name}
+              </option>
+            ))}
           </select>
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Date</label>
           <input
@@ -74,6 +93,7 @@ const QuickAddExpense = () => {
             required
           />
         </div>
+
         <div>
           <label className="block text-sm font-medium mb-1">Notes</label>
           <textarea
@@ -85,6 +105,7 @@ const QuickAddExpense = () => {
             placeholder="Optional"
           />
         </div>
+
         <button
           type="submit"
           className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   Chart,
   LineElement,
@@ -22,8 +22,30 @@ Chart.register(
 
 const SpendingTrends = ({
   title = "Spending Trends",
-  labels = [],
-  datasets = [],
+  labels = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ],
+  datasets = [
+    {
+      label: "Total Spent",
+      data: [1200, 1350, 1280, 1420, 1500, 1600, 1550, 1700, 1650, 0, 0, 0],
+      borderColor: "#2563eb", // Tailwind blue-600
+      backgroundColor: "rgba(37, 99, 235, 0.2)",
+      tension: 0.4,
+      fill: true,
+    },
+  ],
 }) => {
   const chartRef = useRef(null);
 
@@ -55,7 +77,7 @@ const SpendingTrends = ({
         <select className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
           <option>Last 7 Days</option>
           <option>Last 30 Days</option>
-          <option selected>Last 6 Months</option>
+          <option defaultValue={"Last 6 Months"}>Last 6 Months</option>
           <option>Last Year</option>
         </select>
       </div>
