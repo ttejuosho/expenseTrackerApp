@@ -70,6 +70,13 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    await sendEmail(
+      "welcome",
+      { firstName: user.firstName, loginLink: "http://localhost:5173/login" },
+      "Welcome to Penny Pincher Pro!",
+      user.email
+    );
+
     res.json({
       user: {
         userId: user.userId,

@@ -1,31 +1,14 @@
 import { useState, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import authService from "../services/authService";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 const MainLayout = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth(); // ✅ use context instead of local state
   const [darkMode, setDarkMode] = useState(false);
-  const navigate = useNavigate();
 
-  // Load user on mount
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const currentUser = await authService.getCurrentUser(); // calls /auth/me
-        setUser(currentUser);
-      } catch (err) {
-        console.warn("No user logged in, redirecting...");
-        setUser(null);
-        // No need to redirect here — axios interceptor will handle 401
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-
     // Initialize theme from localStorage
     const theme = localStorage.getItem("theme");
     if (
@@ -38,12 +21,12 @@ const MainLayout = () => {
   }, []);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    setDarkMode((prev) => !prev);
     document.documentElement.classList.toggle("dark");
     localStorage.setItem("theme", darkMode ? "light" : "dark");
   };
 
-  if (loading) return null; // Or a spinner while fetching user
+  if (loading) return null; // or show spinner
 
   return (
     <div
@@ -51,7 +34,7 @@ const MainLayout = () => {
         darkMode ? "dark bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
       }`}
     >
-      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} user={user} />
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <main className="container mx-auto px-4 py-8">
         <Outlet context={{ user, darkMode, toggleDarkMode }} />
       </main>

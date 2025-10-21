@@ -221,7 +221,7 @@ export const getMonthlySummary = async (req, res) => {
   }
 };
 
-export const getSummaryByCategory = async (req, res) => {
+export const getSummaryByCategory0 = async (req, res) => {
   try {
     const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -268,5 +268,60 @@ export const getSummaryByCategory = async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to fetch monthly summary by category" });
+  }
+};
+
+export const getSummaryByCategory = async (req, res) => {
+  try {
+    const { range = "thisMonth", startDate, endDate } = req.query;
+    const userId = req.user.userId;
+
+    const now = new Date();
+    let fromDate,
+      toDate = new Date();
+
+    switch (range) {
+      case "3m":
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        break;
+      case "6m":
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+        break;
+      case "1y":
+        fromDate = new Date(now.getFullYear() - 1, now.getMonth() + 1, 1);
+        break;
+      case "custom":
+        fromDate = new Date(startDate);
+        toDate = new Date(endDate);
+        break;
+      default:
+        fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+    }
+
+    const expenses = await Expense.findAll({
+      where: {
+        userId,
+        date: { [Op.between]: [fromDate, toDate] },
+      },
+      include: [{ model: Category, as: "category" }],
+    });
+
+    const summary = expenses.reduce((acc, exp) => {
+      const catName = exp.category?.name || "Uncategorized";
+      const catColor = exp.category?.color || "bg-gray-100 text-gray-800";
+      acc[catName] = acc[catName] || {
+        categoryName: catName,
+        categoryColor: catColor,
+        totalSpent: 0,
+      };
+      acc[catName].totalSpent += parseFloat(exp.amount || 0);
+      return acc;
+    }, {});
+
+    res.json(Object.values(summary));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch spending summary" });
   }
 };

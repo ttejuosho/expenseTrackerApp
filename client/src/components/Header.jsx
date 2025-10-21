@@ -1,10 +1,11 @@
 import { FiDollarSign, FiMoon, FiSun, FiUser } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const Header = ({ darkMode, toggleDarkMode }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ use React Router’s location
 
   const handleLogout = async () => {
     try {
@@ -38,16 +39,25 @@ const Header = ({ darkMode, toggleDarkMode }) => {
         </button>
 
         {/* Auth buttons */}
-        {/* Auth buttons */}
         {user ? (
           <div className="flex items-center space-x-3">
+            <Link
+              to="/home"
+              className={`${
+                location.pathname === "/dashboard"
+                  ? "underline text-indigo-500"
+                  : "text-gray-800 dark:text-gray-200"
+              } font-medium hover:text-indigo-500`}
+            >
+              Dashboard
+            </Link>
             <span className="text-gray-800 dark:text-gray-200 font-medium">
               Hi, {user.firstName}
             </span>
             <button
               onClick={handleLogout}
               className="bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-600 
-      text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <FiUser className="w-5 h-5" />
               <span>Log out</span>
@@ -55,12 +65,11 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           </div>
         ) : (
           <div className="flex items-center space-x-2">
-            {/* Only hide Sign In on login page */}
             {location.pathname !== "/login" && (
               <Link
                 to="/login"
                 className="bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-600
-        text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
               >
                 <FiUser className="w-5 h-5" />
                 <span>Sign in</span>
@@ -71,7 +80,7 @@ const Header = ({ darkMode, toggleDarkMode }) => {
               <Link
                 to="/register"
                 className="bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-600
-      text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                  text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
               >
                 <FiUser className="w-5 h-5" />
                 <span>Sign Up</span>
