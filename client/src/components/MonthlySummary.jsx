@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../api/axios";
 import ProgressBar from "./ProgressBar";
 
-const MonthlySummary = () => {
+const MonthlySummary = ({ reload }) => {
   const [summary, setSummary] = useState({
     amount: 0,
     totalSpent: 0,
@@ -24,7 +24,7 @@ const MonthlySummary = () => {
     };
 
     fetchSummary();
-  }, []);
+  }, [reload]);
 
   if (loading) return <p>Loading monthly summary...</p>;
 

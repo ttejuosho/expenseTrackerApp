@@ -3,7 +3,7 @@ import { FiPlus } from "react-icons/fi";
 import API from "../api/axios";
 import toast from "react-hot-toast";
 
-const QuickAddExpense = () => {
+const QuickAddExpense = ({ onAdd }) => {
   const [expense, setExpense] = useState({
     amount: "",
     categoryId: "",
@@ -33,6 +33,7 @@ const QuickAddExpense = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await API.post("/expenses", expense);
+    if (onAdd) onAdd();
     toast.success("Expense added successfully!");
     setExpense({
       amount: "",

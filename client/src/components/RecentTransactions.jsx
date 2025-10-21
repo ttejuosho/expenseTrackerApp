@@ -3,7 +3,7 @@ import feather from "feather-icons";
 import API from "../api/axios";
 import toast from "react-hot-toast";
 
-const RecentTransactions = () => {
+const RecentTransactions = ({ reload }) => {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const RecentTransactions = () => {
       }
     };
     fetchExpenses();
-  }, []);
+  }, [reload]);
 
   useEffect(() => {
     feather.replace();

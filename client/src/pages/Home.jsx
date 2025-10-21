@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import MonthlySummary from "../components/MonthlySummary";
 import QuickAddExpense from "../components/QuickAddExpense";
@@ -10,6 +10,7 @@ import SpendingAnalytics from "../components/SpendingAnalytics";
 
 function Home() {
   const { darkMode } = useOutletContext(); // Get theme from MainLayout
+  const [reloadTransactions, setReloadTransactions] = useState(false);
 
   useEffect(() => {
     // Initialize Vanta.js if needed
@@ -37,14 +38,16 @@ function Home() {
         <main className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-6">
-              <MonthlySummary />
-              <QuickAddExpense />
+              <MonthlySummary reload={reloadTransactions} />
+              <QuickAddExpense
+                onAdd={() => setReloadTransactions((prev) => !prev)}
+              />
             </div>
             <div className="lg:col-span-2 space-y-6">
-              <RecentTransactions />
+              <RecentTransactions reload={reloadTransactions} />
             </div>
           </div>
-          <SpendingAnalytics />
+          <SpendingAnalytics reload={reloadTransactions} />
         </main>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import API from "../api/axios";
 
-const SpendingAnalytics = () => {
+const SpendingAnalytics = ({ reload }) => {
   const categoryChartRef = useRef(null);
   const trendChartRef = useRef(null);
   const [range, setRange] = useState("thisMonth");
@@ -118,7 +118,7 @@ const SpendingAnalytics = () => {
     };
 
     fetchData();
-  }, [range, customDates]);
+  }, [range, customDates, reload]);
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-xl">
